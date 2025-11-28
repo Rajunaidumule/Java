@@ -1,0 +1,35 @@
+openapi: 3.0.0  # version of api
+info:
+  title: product Cataloug API
+  description: this API will contain lot of product information
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: local server
+paths:
+  /products/createProduct:
+    post:
+      summary: create a new product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+            description: product created successfully
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - productNumber
+        - productName
+        - productValue
+      properties:
+        productNumber:
+          type: string
+        productName:
+            type: string
+        productValue:
+          type: number
