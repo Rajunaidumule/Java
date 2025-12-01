@@ -18,6 +18,14 @@ paths:
       responses:
         '200':
             description: product created successfully
+        '201':
+            description: created
+        '400':
+            description: bad request
+        '404':
+            description: not found
+        '500':
+            description: internal server error
 components:
   schemas:
     Product:
@@ -28,7 +36,7 @@ components:
         - productValue
       properties:
         productNumber:
-          type: string
+          type: Integer
         productName:
             type: string
         productValue:
