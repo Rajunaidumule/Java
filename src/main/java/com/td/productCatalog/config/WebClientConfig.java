@@ -28,7 +28,7 @@ public class WebClientConfig {
         httpHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
         WebClient webClient = WebClient.builder()
-                .baseUrl("http://localhost:8083")
+                .baseUrl("http://localhost:8084")
                 .defaultHeaders(headers -> headers.addAll(httpHeaders))
                 .clientConnector(new ReactorClientHttpConnector(getHttpClientConfig()))
                 .build();

@@ -1,5 +1,6 @@
 package com.td.productCatalog.builder;
 
+import com.td.model.Product;
 import com.td.productCatalog.exception.ClientErrorInvokingWebClientException;
 import com.td.productCatalog.exception.ServerErrorInvokingWebClientException;
 import com.td.productCatalog.exception.TImeOutInvokingWebClientException;
@@ -7,6 +8,7 @@ import com.td.productCatalog.exception.UnexpectedErrorInvokingWebClientException
 import io.netty.handler.timeout.ReadTimeoutException;
 import jakarta.annotation.Nullable;
 import lombok.Generated;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -42,6 +45,57 @@ public class WebClientBuilder {
                 (response) -> this.handleResponse(response, resultType)
         ).onErrorMap(WebClientRequestException.class,(throwable) -> this.handleRequestError(throwable));
     }
+
+
+    public <T> T invokeWebClientCallforList(@Nullable String uri, Object requestBody, @Nullable HttpHeaders headers, HttpMethod method){
+        return (T) this.invokeWebClientForList(uri, null, headers, method).block();
+    }
+
+
+
+    public Mono<List<Product>> invokeWebClientForList(String uri, Object requestBody, HttpHeaders headers, HttpMethod method) {
+            ParameterizedTypeReference<List<Product>> typeRef = new ParameterizedTypeReference<>() {};
+        return this.client.method(method)
+                .uri(Objects.isNull(uri) ? "" : uri)
+                .headers(httpHeaders -> {
+                    if (Objects.nonNull(headers)) {
+                        httpHeaders.addAll(headers);
+                    }
+                })
+                .body(Objects.nonNull(requestBody) ? BodyInserters.fromValue(requestBody) : BodyInserters.empty())
+                .exchangeToMono(response -> {
+                    URI requestUri = response.request().getURI();
+                    HttpHeaders respHeaders = response.headers().asHttpHeaders();
+
+                    if (response.statusCode().is2xxSuccessful()) {
+                        return response.bodyToMono(typeRef);
+                    } else if (response.statusCode().is4xxClientError()) {
+                        return response.bodyToMono(String.class)
+                                .flatMap(errorBody -> Mono.error(new ClientErrorInvokingWebClientException(
+                                        requestUri,
+                                        String.format("Client error Exception thrown while using webclient. HttpStatus code of '%s'.", response.statusCode()),
+                                        response.statusCode().value(),
+                                        response.statusCode().toString(),
+                                        respHeaders,
+                                        Optional.ofNullable(errorBody).map(String::getBytes).orElse(null)
+                                )));
+                    } else if (response.statusCode().is5xxServerError()) {
+                        return response.bodyToMono(String.class)
+                                .flatMap(errorBody -> Mono.error(new ServerErrorInvokingWebClientException(
+                                        requestUri,
+                                        String.format("Server error Exception thrown while using webclient. HttpStatus code of '%s'.", response.statusCode()),
+                                        response.statusCode().value(),
+                                        response.statusCode().toString(),
+                                        respHeaders,
+                                        Optional.ofNullable(errorBody).map(String::getBytes).orElse(null)
+                                )));
+                    } else {
+                        return Mono.error(new UnexpectedErrorInvokingWebClientException(requestUri, "Unexpected error exception thrown while using webclient"));
+                    }
+                })
+                .onErrorMap(WebClientRequestException.class, this::handleRequestError);
+    }
+
 
     private <T> Mono<T> handleResponse(ClientResponse response, Class<T> resultType) {
         HttpStatus status = HttpStatus.valueOf(response.statusCode().value());
