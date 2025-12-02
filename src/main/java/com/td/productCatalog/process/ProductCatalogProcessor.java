@@ -7,6 +7,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class ProductCatalogProcessor {
@@ -17,41 +18,19 @@ public class ProductCatalogProcessor {
     TaskExecutor executor;
 
     public void createProduct(Product product) {
-        service.createProduct(product);
+       // service.createProduct(product);
+        CompletableFuture<List<Product>> future1 = CompletableFuture.supplyAsync(() ->service.getProducts(), executor);
+        CompletableFuture future2 = CompletableFuture.runAsync(() ->service.createProduct(product),executor);
+        CompletableFuture.allOf(future1,future2).join();
+        List<Product> list = future1.join();
+        System.out.println("Products after addition: "+list);
     }
 
     public List<Product> getAllProducts() {
 
-        executor.execute(() -> method1());
-        executor.execute(() -> method2());
-        executor.execute(() -> method3());
-        executor.execute(() -> method4());
-        executor.execute(() -> method5());
-        executor.execute(() -> method6());
-        executor.execute(() -> method7());
       return service.getProducts();
     }
 
-    public void method1(){
-        System.out.println("inside method1");
-    }
 
-    public void method2(){
-        System.out.println("inside method2");
-    }
-    public void method3(){
-        System.out.println("inside method3");
-    }
-    public void method4(){
-        System.out.println("inside method4");
-    }
-    public void method5(){
-        System.out.println("inside method5");
-    }
-    public void method6(){
-        System.out.println("inside method6");
-    }
-    public void method7(){
-        System.out.println("inside method7");
-    }
+
 }
