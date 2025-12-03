@@ -22,28 +22,26 @@ paths:
           required: true
           schema:
             type: string
-          x-codegen-param-name: requestId
         - name: x-td-email
           in: header
           description: email of the user
           required: true
           schema:
             type: string
-          x-codegen-param-name: emailId
+          x-parameter-extra-annotation: |
+            @com.td.productCatalog.annotations.ValidEmailHeader
         - name: x-td-uid
           in: header
           description: user id
           required: false
           schema:
             type: string
-          x-codegen-param-name: uniqueId
         - name: x-td-app-name
           in: header
           description: application name
           required: false
           schema:
             type: string
-          x-codegen-param-name: appName
       responses:
         '200':
             description: product created successfully
