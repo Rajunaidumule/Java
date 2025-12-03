@@ -45,6 +45,7 @@ openApiGenerate {
 	invokerPackage = "com.td.invoker"
 	generateApiTests = false
 	generateModelTests = false
+	templateDir = "$rootDir/spec"
 	configOptions = [
 	        interfaceOnly: "true",
 			useSpringBoot3: "true",
@@ -52,6 +53,17 @@ openApiGenerate {
 			useLombok: "true",
 			modelBuilder: "true"
 	]
+
+	parameterNameMappings =
+			[
+			        "x-td-request-id": "requestId",
+					"x-td-email": "emailId",
+					"x-td-uid": "uniqueId",
+					"x-td-app-name": "appName"
+			]
+
+	// parametersNameMappings will use to map the header parameters to valid java method parameter names ,but currently it
+	// is not working as expected
 }
 
 sourceSets{

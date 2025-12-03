@@ -15,6 +15,35 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Product'
+      parameters:
+        - name: x-td-request-id
+          in: header
+          description: request id for tracking
+          required: true
+          schema:
+            type: string
+          x-codegen-param-name: requestId
+        - name: x-td-email
+          in: header
+          description: email of the user
+          required: true
+          schema:
+            type: string
+          x-codegen-param-name: emailId
+        - name: x-td-uid
+          in: header
+          description: user id
+          required: false
+          schema:
+            type: string
+          x-codegen-param-name: uniqueId
+        - name: x-td-app-name
+          in: header
+          description: application name
+          required: false
+          schema:
+            type: string
+          x-codegen-param-name: appName
       responses:
         '200':
             description: product created successfully
@@ -36,7 +65,7 @@ components:
         - productValue
       properties:
         productNumber:
-          type: Integer
+          type: integer
         productName:
             type: string
         productValue:
